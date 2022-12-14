@@ -2,7 +2,8 @@ const express = require("express");
 const { Pool } = require("pg");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
-const {parse, stringify, toJSON, fromJSON} = require('flatted');const axios = require("axios");
+const {stringify} = require('flatted');
+const axios = require("axios");
 const PORT = process.env.PORT || 5000;
 dotenv.config();
 const app = express();
@@ -30,8 +31,13 @@ app.get("/incident", (req, res) => {
   (async () => {
     const client = await pool.connect();
     try {
-      const data = await client.query("SELECT * FROM incidents WHERE client_id = $1",[req.query.client_id]);
-      res.json(data.rows[0]);
+      if(!req.query.client_id){
+        res.send("client_id is not specified")
+      }
+      else{
+        const data = await client.query("SELECT * FROM incidents WHERE client_id = $1",[req.query.client_id]);
+        res.json(data.rows[0]);
+      }
     } catch (err) {
       console.log(err.stack);
     } finally {
